@@ -1,0 +1,24 @@
+# Backend
+backend/venv/
+backend/uploads/
+backend/outputs/
+backend/runs/
+backend/model/best.pt
+
+# Dataset
+dataset/
+
+# Python
+__pycache__/
+*.pyc
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Env
+.env
+
+# OS
+.DS_Store
+Thumbs.db
