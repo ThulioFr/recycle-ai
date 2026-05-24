@@ -14,6 +14,7 @@ Projeto acadêmico utilizando YOLOv8 para identificar materiais recicláveis em 
 - Python
 - FastAPI
 - YOLOv8 (Ultralytics)
+- OpenCV
 
 ---
 
@@ -31,7 +32,49 @@ recycle-ai/
 
 # 🚀 Como rodar o projeto
 
-# 1️⃣ Rodar o Backend
+# 1️⃣ Rodar o projeto completo
+
+## Instalar dependências da raiz
+
+Na raiz do projeto:
+
+```bash
+npm install
+```
+
+---
+
+## Rodar frontend + backend simultaneamente
+
+```bash
+npm run dev
+```
+
+---
+
+# 🌐 URLs do projeto
+
+## Frontend
+
+```txt
+http://localhost:5173
+```
+
+## Backend
+
+```txt
+http://localhost:8000
+```
+
+## Swagger da API
+
+```txt
+http://localhost:8000/docs
+```
+
+---
+
+# 2️⃣ Rodar apenas o Backend
 
 ## Entrar na pasta backend
 
@@ -77,23 +120,7 @@ uvicorn main:app --reload
 
 ---
 
-## Backend disponível em
-
-```txt
-http://localhost:8000
-```
-
----
-
-## Swagger da API
-
-```txt
-http://localhost:8000/docs
-```
-
----
-
-# 2️⃣ Rodar o Frontend
+# 3️⃣ Rodar apenas o Frontend
 
 ## Entrar na pasta frontend
 
@@ -119,20 +146,12 @@ npm run dev
 
 ---
 
-## Frontend disponível em
-
-```txt
-http://localhost:5173
-```
-
----
-
 # 📦 Dependências principais
 
 ## Frontend
 
 ```bash
-npm install styled-components axios
+npm install styled-components axios react-icons
 npm install -D @types/styled-components
 ```
 
@@ -141,7 +160,7 @@ npm install -D @types/styled-components
 ## Backend
 
 ```bash
-pip install fastapi uvicorn ultralytics python-multipart
+pip install fastapi uvicorn ultralytics python-multipart opencv-python
 ```
 
 ---
@@ -156,6 +175,8 @@ A inteligência artificial analisa a imagem e identifica materiais como:
 - Plástico
 - Vidro
 - Metal
+- Papelão
+- Orgânico
 
 ---
 
@@ -163,6 +184,27 @@ A inteligência artificial analisa a imagem e identifica materiais como:
 
 - YOLOv8n
 - Ultralytics
+- OpenCV
+
+---
+
+# 📚 Dataset utilizado
+
+Este projeto foi desenvolvido utilizando:
+
+- React + TypeScript no frontend
+- Styled-Components para estilização
+- Python no backend
+- FastAPI para API REST
+- YOLOv8 para detecção de objetos
+- OpenCV para processamento de imagens
+- Ultralytics YOLO
+- Axios para requisições HTTP
+- Dataset treinado através do Roboflow Universe
+
+## 🔗 Dataset utilizado (Roboflow)
+
+https://universe.roboflow.com/group-project-vv9xk/waste-classificator-3
 
 ---
 
