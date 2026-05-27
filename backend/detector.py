@@ -1,42 +1,36 @@
 from ultralytics import YOLO
 from collections import Counter
-import os
-import uuid
 import cv2
+import numpy as np
+import base64
 
 model = YOLO("model/best.pt")
 
-OUTPUT_FOLDER = "outputs"
 
-os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+def detect_image(file_bytes: bytes):
+    np_arr = np.frombuffer(file_bytes, np.uint8)
+    image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
+    if image is None:
+        raise ValueError("Imagem inválida ou formato não suportado.")
 
-def detect_image(path):
-
-    results = model(path)
+    results = model(image)
 
     detections = []
     classes = []
-
-    output_image = None
+    output_image_base64 = None
 
     for r in results:
-
         plotted = r.plot()
 
-        output_name = f"{uuid.uuid4()}.jpg"
+        success, buffer = cv2.imencode(".jpg", plotted)
 
-        output_path = f"{OUTPUT_FOLDER}/{output_name}"
-
-        cv2.imwrite(output_path, plotted)
-
-        output_image = output_name
+        if success:
+            output_image_base64 = base64.b64encode(buffer).decode("utf-8")
 
         for box in r.boxes:
-
             cls = int(box.cls[0])
             conf = float(box.conf[0])
-
             class_name = model.names[cls]
 
             classes.append(class_name)
@@ -52,5 +46,5 @@ def detect_image(path):
         "detections": detections,
         "counts": dict(counts),
         "total": len(classes),
-        "image": output_image
+        "image": f"data:image/jpeg;base64,{output_image_base64}" if output_image_base64 else None
     }
