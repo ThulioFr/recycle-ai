@@ -1,13 +1,9 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-
-import shutil
-import os
 
 from detector import detect_image
 
-app = FastAPI()
+app = FastAPI(title="Recycle AI API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -17,29 +13,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-UPLOAD_FOLDER = "uploads"
-
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs("outputs", exist_ok=True)
-
-app.mount("/outputs", StaticFiles(directory="outputs"), name="outputs")
-
 
 @app.get("/")
 def home():
-    return {
-        "message": "API funcionando"
-    }
+    return {"message": "API funcionando"}
 
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
+    try:
+        file_bytes = await file.read()
+        return detect_image(file_bytes)
 
-    file_path = f"{UPLOAD_FOLDER}/{file.filename}"
-
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
-    result = detect_image(file_path)
-
-    return result
+    except Exception as error:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Erro ao processar imagem: {str(error)}"
+        )
