@@ -1,5 +1,7 @@
 # Backend
 backend/venv/
+backend/.env
+backend/.env.prod
 backend/uploads/
 backend/outputs/
 backend/runs/
