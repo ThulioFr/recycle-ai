@@ -175,7 +175,7 @@ A inteligência artificial analisa a imagem e identifica materiais como:
 - Plástico
 - Vidro
 - Metal
-- Papelão
+- Lixo Eletrônico
 - Orgânico
 
 ---
@@ -204,7 +204,7 @@ Este projeto foi desenvolvido utilizando:
 
 ## 🔗 Dataset utilizado (Roboflow)
 
-https://universe.roboflow.com/group-project-vv9xk/waste-classificator-3
+https://universe.roboflow.com/feli-j8ejv/waste-7u1up
 
 ---
 

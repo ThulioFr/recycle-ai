@@ -30,9 +30,19 @@ import {
   Summary,
   SummaryCard,
   TableWrapper,
-  DetectionGrid,
-  DetectionCard,
   CarouselControls,
+  ChartsGrid,
+  ChartCard,
+  ChartHeader,
+  PieChartBox,
+  PieGraphic,
+  ChartLegend,
+  LegendItem,
+  VerticalBarChart,
+  VerticalBarItem,
+  VerticalBarColumn,
+  VerticalBarFill,
+  VerticalBarLabel,
 } from "./style";
 
 interface Detection {
@@ -44,18 +54,39 @@ interface Counts {
   [key: string]: number;
 }
 
+interface MaterialStat {
+  material: string;
+  label: string;
+  quantity: number;
+  averageConfidence: number;
+}
+
 const materialNames: Record<string, string> = {
   glass: "Vidro",
-  cardboard: "Papelão",
+  electronic: "Eletrônico",
   plastic: "Plástico",
   metal: "Metal",
   paper: "Papel",
-  trash: "Lixo",
   organic: "Orgânico",
 };
 
+const materialColors: Record<string, string> = {
+  organic: "#72380f",
+  paper: "#1846ac",
+  electronic: "#ff8400",
+  plastic: "#ad1818",
+  glass: "#1d9123",
+  metal: "#facc15",
+};
+
+function getMaterialColor(material: string) {
+  return materialColors[material] ?? "#8ca68d";
+}
+
 export function UploadArea() {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const thumbnailRef = useRef<HTMLDivElement | null>(null);
+  const resultsRef = useRef<HTMLElement | null>(null);
 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [preview, setPreview] = useState("");
@@ -67,7 +98,7 @@ export function UploadArea() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
-  const thumbnailRef = useRef<HTMLDivElement | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const selectedImage = imageBank[selectedIndex];
 
@@ -79,6 +110,53 @@ export function UploadArea() {
       detections.length
     );
   }, [detections]);
+
+  const materialStats = useMemo<MaterialStat[]>(() => {
+    return Object.entries(counts).map(([material, quantity]) => {
+      const relatedDetections = detections.filter(
+        (item) => item.class === material
+      );
+
+      const average =
+        relatedDetections.length > 0
+          ? relatedDetections.reduce((acc, item) => acc + item.confidence, 0) /
+            relatedDetections.length
+          : 0;
+
+      return {
+        material,
+        label: materialNames[material] ?? material,
+        quantity,
+        averageConfidence: average,
+      };
+    });
+  }, [counts, detections]);
+
+  const maxQuantity = useMemo(() => {
+    if (!materialStats.length) return 1;
+
+    return Math.max(...materialStats.map((item) => item.quantity), 1);
+  }, [materialStats]);
+
+  const pieChartBackground = useMemo(() => {
+    if (!materialStats.length || total === 0) {
+      return "#e4eae5";
+    }
+
+    let current = 0;
+
+    const segments = materialStats.map((item) => {
+      const percentage = (item.quantity / total) * 100;
+      const start = current;
+      const end = current + percentage;
+
+      current = end;
+
+      return `${getMaterialColor(item.material)} ${start}% ${end}%`;
+    });
+
+    return `conic-gradient(${segments.join(", ")})`;
+  }, [materialStats, total]);
 
   useEffect(() => {
     const element = thumbnailRef.current;
@@ -127,6 +205,7 @@ export function UploadArea() {
   function reset() {
     setPreview("");
     setFileName("");
+    setIsDragging(false);
     clearResults();
 
     if (inputRef.current) {
@@ -138,7 +217,15 @@ export function UploadArea() {
     setPreview(previewUrl || URL.createObjectURL(file));
     setFileName(file.name);
     setLoading(true);
+    setIsDragging(false);
     clearResults();
+
+    setTimeout(() => {
+      resultsRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
 
     try {
       const formData = new FormData();
@@ -202,30 +289,68 @@ export function UploadArea() {
     analyzeBankImage(randomIndex);
   }
 
+  function validateImageFile(file: File) {
+    if (!file.type.startsWith("image/")) {
+      setMessage("Selecione um arquivo de imagem válido.");
+      return false;
+    }
+
+    return true;
+  }
+
   function handleUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
 
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      setMessage("Selecione um arquivo de imagem válido.");
-      return;
-    }
+    if (!validateImageFile(file)) return;
 
     analyzeFile(file);
   }
 
+  function handleDragEnter(event: React.DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (loading) return;
+
+    setIsDragging(true);
+  }
+
+  function handleDragOver(event: React.DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (loading) return;
+
+    setIsDragging(true);
+  }
+
+  function handleDragLeave(event: React.DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const currentTarget = event.currentTarget;
+    const relatedTarget = event.relatedTarget as Node | null;
+
+    if (relatedTarget && currentTarget.contains(relatedTarget)) return;
+
+    setIsDragging(false);
+  }
+
   function handleDrop(event: React.DragEvent<HTMLLabelElement>) {
     event.preventDefault();
+    event.stopPropagation();
+
+    setIsDragging(false);
+
+    if (loading) return;
 
     const file = event.dataTransfer.files?.[0];
 
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      setMessage("Selecione um arquivo de imagem válido.");
-      return;
-    }
+    if (!validateImageFile(file)) return;
 
     analyzeFile(file);
   }
@@ -296,11 +421,7 @@ export function UploadArea() {
               Anterior
             </Button>
 
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={selectNextImage}
-            >
+            <Button type="button" variant="secondary" onClick={selectNextImage}>
               Próxima
             </Button>
           </CarouselControls>
@@ -316,7 +437,9 @@ export function UploadArea() {
             >
               {failedImages[image.src] ? (
                 <ImageFallback size="small">
-                  <strong><MdRecycling /></strong>
+                  <strong>
+                    <MdRecycling />
+                  </strong>
                 </ImageFallback>
               ) : (
                 <img
@@ -339,18 +462,28 @@ export function UploadArea() {
         </UploadHeader>
 
         <UploadBox
+          $dragging={isDragging}
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          onDragOver={(event) => event.preventDefault()}
         >
           <input
             ref={inputRef}
             type="file"
             accept="image/*"
             onChange={handleUpload}
+            disabled={loading}
           />
 
           {preview ? (
             <PreviewImage src={preview} alt="Imagem selecionada" />
+          ) : isDragging ? (
+            <UploadPlaceholder>
+              <strong>Solte a imagem aqui</strong>
+              <span>A imagem será enviada para análise.</span>
+              <small>JPG, PNG ou WEBP</small>
+            </UploadPlaceholder>
           ) : (
             <UploadPlaceholder>
               <strong>Selecionar imagem</strong>
@@ -385,7 +518,7 @@ export function UploadArea() {
         </UploadActions>
       </UploadSection>
 
-      <ResultsSection>
+      <ResultsSection ref={resultsRef}>
         <ImagePanel>
           <h2>Resultado da análise</h2>
 
@@ -423,6 +556,89 @@ export function UploadArea() {
 
         {total > 0 && (
           <>
+            <ChartsGrid>
+              <ChartCard>
+                <ChartHeader>
+                  <div>
+                    <h3>Quantidade por material</h3>
+                    <p>Distribuição dos objetos detectados na imagem.</p>
+                  </div>
+                </ChartHeader>
+
+                <PieChartBox>
+                  <PieGraphic background={pieChartBackground}>
+                    <strong>{total}</strong>
+                    <span>objetos</span>
+                  </PieGraphic>
+
+                  <ChartLegend>
+                    {materialStats.map((item) => (
+                      <LegendItem
+                        key={item.material}
+                        color={getMaterialColor(item.material)}
+                      >
+                        <span />
+                        <p>{item.label}</p>
+                        <strong>{item.quantity}</strong>
+                      </LegendItem>
+                    ))}
+                  </ChartLegend>
+                </PieChartBox>
+              </ChartCard>
+
+              <ChartCard>
+                <ChartHeader>
+                  <div>
+                    <h3>Barras por material</h3>
+                    <p>Quantidade detectada em barras verticais.</p>
+                  </div>
+                </ChartHeader>
+
+                <VerticalBarChart>
+                  {materialStats.map((item) => (
+                    <VerticalBarItem key={item.material}>
+                      <strong>{item.quantity}</strong>
+
+                      <VerticalBarColumn>
+                        <VerticalBarFill
+                          height={(item.quantity / maxQuantity) * 100}
+                          color={getMaterialColor(item.material)}
+                        />
+                      </VerticalBarColumn>
+
+                      <VerticalBarLabel>{item.label}</VerticalBarLabel>
+                    </VerticalBarItem>
+                  ))}
+                </VerticalBarChart>
+              </ChartCard>
+            </ChartsGrid>
+
+            <ChartCard>
+              <ChartHeader>
+                <div>
+                  <h3>Confiança por material</h3>
+                  <p>Confiança média em barras verticais.</p>
+                </div>
+              </ChartHeader>
+
+              <VerticalBarChart>
+                {materialStats.map((item) => (
+                  <VerticalBarItem key={item.material}>
+                    <strong>{item.averageConfidence.toFixed(1)}%</strong>
+
+                    <VerticalBarColumn>
+                      <VerticalBarFill
+                        height={item.averageConfidence}
+                        color={getMaterialColor(item.material)}
+                      />
+                    </VerticalBarColumn>
+
+                    <VerticalBarLabel>{item.label}</VerticalBarLabel>
+                  </VerticalBarItem>
+                ))}
+              </VerticalBarChart>
+            </ChartCard>
+
             <TableWrapper>
               <table>
                 <thead>
@@ -434,36 +650,16 @@ export function UploadArea() {
                 </thead>
 
                 <tbody>
-                  {Object.entries(counts).map(([material, quantity]) => {
-                    const related = detections.filter(
-                      (item) => item.class === material
-                    );
-
-                    const confidence =
-                      related.reduce((acc, item) => acc + item.confidence, 0) /
-                      related.length;
-
-                    return (
-                      <tr key={material}>
-                        <td>{materialNames[material] ?? material}</td>
-                        <td>{quantity}</td>
-                        <td>{confidence.toFixed(1)}%</td>
-                      </tr>
-                    );
-                  })}
+                  {materialStats.map((item) => (
+                    <tr key={item.material}>
+                      <td>{item.label}</td>
+                      <td>{item.quantity}</td>
+                      <td>{item.averageConfidence.toFixed(1)}%</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </TableWrapper>
-
-            <DetectionGrid>
-              {detections.map((item, index) => (
-                <DetectionCard key={`${item.class}-${index}`}>
-                  <span>{materialNames[item.class] ?? item.class}</span>
-                  <strong>{item.confidence.toFixed(1)}%</strong>
-                  <small>Confiança da detecção</small>
-                </DetectionCard>
-              ))}
-            </DetectionGrid>
           </>
         )}
       </ResultsSection>

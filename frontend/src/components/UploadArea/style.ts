@@ -386,18 +386,21 @@ export const UploadHeader = styled.div`
   }
 `;
 
-export const UploadBox = styled.label`
+export const UploadBox = styled.label<{ $dragging?: boolean }>`
   width: 100%;
   min-width: 0;
   min-height: 320px;
-  border: 1.5px dashed #a8b8aa;
+  border: 2px dashed
+    ${({ $dragging }) => ($dragging ? "#2f6b45" : "#a8b8aa")};
   border-radius: 12px;
-  background: #f8faf8;
+  background: ${({ $dragging }) => ($dragging ? "#eef7f0" : "#f8faf8")};
   display: grid;
   place-items: center;
   overflow: hidden;
   cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transform: ${({ $dragging }) => ($dragging ? "scale(1.01)" : "scale(1)")};
+  transition: border-color 0.2s ease, background 0.2s ease,
+    transform 0.2s ease;
 
   &:hover {
     border-color: #2f6b45;
@@ -420,6 +423,7 @@ export const UploadBox = styled.label`
 export const UploadPlaceholder = styled.div`
   text-align: center;
   padding: 24px;
+  pointer-events: none;
 
   strong {
     display: block;
@@ -458,6 +462,7 @@ export const PreviewImage = styled.img`
   max-height: 430px;
   object-fit: contain;
   background: #f8faf8;
+  pointer-events: none;
 
   @media (max-width: 480px) {
     max-height: 280px;
@@ -655,6 +660,189 @@ export const SummaryCard = styled.div`
   }
 `;
 
+export const ChartsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const ChartCard = styled.div`
+  min-width: 0;
+  margin-top: 18px;
+  border: 1px solid #dfe5df;
+  border-radius: 12px;
+  padding: 18px;
+  background: #fbfcfb;
+
+  ${ChartsGrid} & {
+    margin-top: 0;
+  }
+
+  @media (max-width: 480px) {
+    padding: 14px;
+  }
+`;
+
+export const ChartHeader = styled.div`
+  margin-bottom: 18px;
+
+  h3 {
+    color: #18281f;
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+
+  p {
+    color: #66736b;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+`;
+
+export const PieChartBox = styled.div`
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 22px;
+  align-items: center;
+
+  @media (max-width: 620px) {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+`;
+
+export const PieGraphic = styled.div<{ background: string }>`
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: ${({ background }) => background};
+  display: grid;
+  place-content: center;
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 42px;
+    background: #fbfcfb;
+    border-radius: 50%;
+  }
+
+  strong,
+  span {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  strong {
+    color: #1d2b22;
+    font-size: 30px;
+    line-height: 1;
+  }
+
+  span {
+    color: #66736b;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+`;
+
+export const ChartLegend = styled.div`
+  display: grid;
+  gap: 10px;
+  width: 100%;
+`;
+
+export const LegendItem = styled.div<{ color: string }>`
+  display: grid;
+  grid-template-columns: 12px 1fr auto;
+  align-items: center;
+  gap: 10px;
+
+  span {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    background: ${({ color }) => color};
+  }
+
+  p {
+    color: #26342b;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: capitalize;
+  }
+
+  strong {
+    color: #2f6b45;
+    font-size: 14px;
+    font-weight: 800;
+  }
+`;
+
+export const VerticalBarChart = styled.div`
+  min-height: 260px;
+  display: flex;
+  align-items: end;
+  gap: 18px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px 4px 2px;
+`;
+
+export const VerticalBarItem = styled.div`
+  min-width: 74px;
+  height: 240px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  justify-items: center;
+  gap: 8px;
+
+  strong {
+    color: #2f6b45;
+    font-size: 13px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+`;
+
+export const VerticalBarColumn = styled.div`
+  width: 44px;
+  height: 170px;
+  border-radius: 10px 10px 4px 4px;
+  background: #e4eae5;
+  display: flex;
+  align-items: end;
+  overflow: hidden;
+`;
+
+export const VerticalBarFill = styled.div<{ height: number; color: string }>`
+  width: 100%;
+  height: ${({ height }) => Math.min(Math.max(height, 0), 100)}%;
+  background: ${({ color }) => color};
+  border-radius: 10px 10px 4px 4px;
+  transition: height 0.35s ease;
+`;
+
+export const VerticalBarLabel = styled.span`
+  max-width: 78px;
+  min-height: 32px;
+  color: #26342b;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  text-transform: capitalize;
+  word-break: break-word;
+`;
+
 export const TableWrapper = styled.div`
   width: 100%;
   min-width: 0;
@@ -692,46 +880,5 @@ export const TableWrapper = styled.div`
 
   tr:last-child td {
     border-bottom: none;
-  }
-`;
-
-export const DetectionGrid = styled.div`
-  margin-top: 18px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
-
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-export const DetectionCard = styled.div`
-  min-width: 0;
-  border: 1px solid #dfe5df;
-  border-radius: 10px;
-  padding: 14px;
-  background: #fbfcfb;
-
-  span {
-    display: block;
-    color: #2f6b45;
-    font-size: 14px;
-    font-weight: 800;
-    text-transform: capitalize;
-    margin-bottom: 8px;
-    word-break: break-word;
-  }
-
-  strong {
-    display: block;
-    color: #1d2b22;
-    font-size: 24px;
-    margin-bottom: 4px;
-  }
-
-  small {
-    color: #66736b;
-    font-size: 12px;
   }
 `;
