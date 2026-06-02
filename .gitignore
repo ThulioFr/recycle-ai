@@ -3,7 +3,6 @@ backend/venv/
 backend/uploads/
 backend/outputs/
 backend/runs/
-backend/model/best.pt
 
 # Dataset
 dataset_old/
@@ -22,6 +21,9 @@ node_modules/
 
 # Env
 .env
+.env.*
+**/.env
+**/.env.*
 
 # OS
 .DS_Store
