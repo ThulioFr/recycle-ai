@@ -1,5 +1,10 @@
 import { UploadArea } from "../../components/UploadArea";
 
+import { GiSodaCan, GiWineBottle } from "react-icons/gi";
+import { MdDevicesOther, MdRecycling } from "react-icons/md";
+import { IoIosPaper } from "react-icons/io";
+import { FaBottleWater } from "react-icons/fa6";
+
 import {
   Page,
   Container,
@@ -12,9 +17,56 @@ import {
   FlowHeader,
   FlowGrid,
   FlowItem,
+  MaterialsSection,
+  MaterialsHeader,
+  MaterialsGrid,
+  MaterialItem,
   MainContent,
   Footer,
 } from "./style";
+import type { JSX } from "react";
+
+const recyclableMaterials = [
+  {
+    name: "Papel",
+    description: "Folhas, jornais, revistas e outros resíduos de papel.",
+    color: "#1846ac",
+  },
+  {
+    name: "Eletrônico",
+    description: "Pequenos dispositivos, cabos, componentes e resíduos eletrônicos.",
+    color: "#ff8400",
+  },
+  {
+    name: "Plástico",
+    description: "Garrafas, potes, sacolas e embalagens plásticas.",
+    color: "#ad1818",
+  },
+  {
+    name: "Vidro",
+    description: "Garrafas, potes e objetos de vidro reciclável.",
+    color: "#1d9123",
+  },
+  {
+    name: "Metal",
+    description: "Latas, alumínio e outros resíduos metálicos.",
+    color: "#facc15",
+  },
+  {
+    name: "Orgânico",
+    description: "Restos de alimentos e resíduos biodegradáveis.",
+    color: "#72380f",
+  },
+];
+
+const recyclableIcons: Record<string, JSX.Element> = {
+  Papel: <IoIosPaper color={"#ffffff"} />,
+  Eletrônico: <MdDevicesOther color={"#ffffff"} />,
+  Plástico: <FaBottleWater color={"#ffffff"} />,
+  Vidro: <GiWineBottle color={"#ffffff"} />,
+  Metal: <GiSodaCan color={"#ffffff"} />,
+  Orgânico: <MdRecycling color={"#ffffff"} />,
+};
 
 export function Home() {
   return (
@@ -64,6 +116,30 @@ export function Home() {
             </FlowItem>
           </FlowGrid>
         </FlowSection>
+
+        <MaterialsSection>
+          <MaterialsHeader>
+            <h2>Materiais analisados</h2>
+            <p>
+              O modelo foi treinado para reconhecer os principais tipos de
+              resíduos recicláveis e orgânicos.
+            </p>
+          </MaterialsHeader>
+
+          <MaterialsGrid>
+            {recyclableMaterials.map((material) => (
+              <MaterialItem key={material.name} color={material.color}>
+                <span>
+                  {recyclableIcons[material.name] || <MdRecycling color={"#ffffff"} />}
+                </span>
+                <div>
+                  <strong>{material.name}</strong>
+                  <p>{material.description}</p>
+                </div>
+              </MaterialItem>
+            ))}
+          </MaterialsGrid>
+        </MaterialsSection>
 
         <MainContent>
           <UploadArea />

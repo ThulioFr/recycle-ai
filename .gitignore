@@ -6,6 +6,7 @@ backend/runs/
 backend/model/best.pt
 
 # Dataset
+dataset_old/
 dataset/
 
 # Python

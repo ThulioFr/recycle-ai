@@ -16,13 +16,19 @@ app.add_middleware(
 
 @app.get("/")
 def home():
-    return {"message": "API funcionando"}
+    return {
+        "message": "API funcionando"
+    }
 
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
     try:
         file_bytes = await file.read()
+
+        if not file_bytes:
+            raise ValueError("Nenhuma imagem foi enviada.")
+
         return detect_image(file_bytes)
 
     except Exception as error:
