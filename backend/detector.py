@@ -94,7 +94,8 @@ def detect_image(file_bytes: bytes):
         conf=0.35,
         iou=0.5,
         imgsz=640,
-        verbose=False
+        verbose=False,
+        device="cpu"
     )
 
     detections = []
