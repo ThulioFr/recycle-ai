@@ -1,6 +1,5 @@
 import os
 
-# Limites antes de importar bibliotecas pesadas
 os.environ.setdefault("YOLO_CONFIG_DIR", "/tmp/Ultralytics")
 os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
